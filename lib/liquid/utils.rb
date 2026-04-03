@@ -14,7 +14,8 @@ module Liquid
         elsif to
           collection.slice(from, to - from) || Const::EMPTY_ARRAY
         else
-          collection.slice(from..) || Const::EMPTY_ARRAY
+          # Use slice(from, length) to avoid Range allocation
+          collection.slice(from, collection.length - from) || Const::EMPTY_ARRAY
         end
       else
         slice_collection_using_each(collection, from, to)

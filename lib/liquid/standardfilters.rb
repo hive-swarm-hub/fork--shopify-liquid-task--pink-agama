@@ -436,14 +436,19 @@ module Liquid
     #   Strips all HTML tags from a string.
     # @liquid_syntax string | strip_html
     # @liquid_return [string]
+    STRIP_HTML_BLOCKS_RE = /(?:<script|<!--|<style)/i
     def strip_html(input)
       input = Utils.to_s(input)
       # Fast path: no HTML tags present
       return input unless input.include?('<')
-      empty  = ''
-      result = input.gsub(STRIP_HTML_BLOCKS, empty)
-      result.gsub!(STRIP_HTML_TAGS, empty)
-      result
+      # Only check for script/comment/style blocks if they might exist
+      if STRIP_HTML_BLOCKS_RE.match?(input)
+        result = input.gsub(STRIP_HTML_BLOCKS, '')
+        result.gsub!(STRIP_HTML_TAGS, '')
+        result
+      else
+        input.gsub(STRIP_HTML_TAGS, '')
+      end
     end
 
     # @liquid_public_docs
