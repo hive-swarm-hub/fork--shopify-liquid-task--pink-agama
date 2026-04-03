@@ -8,3 +8,4 @@ __pycache__/
 reference-main/
 shopify-liquid.zip
 *.log
+.hive/agent.log
