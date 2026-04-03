@@ -474,7 +474,7 @@ module Liquid
     end
 
     def render(context)
-      obj = context.evaluate(@name)
+      obj = @name.instance_of?(VariableLookup) ? @name.evaluate(context) : context.evaluate(@name)
 
       @filters.each do |filter_name, filter_args, filter_kwargs|
         if filter_args.empty? && !filter_kwargs
