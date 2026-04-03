@@ -248,7 +248,7 @@ module Liquid
       l = length - truncate_string_str.length
       l = 0 if l < 0
 
-      input_str.length > length ? input_str[0...l].concat(truncate_string_str) : input_str
+      input_str.length > length ? (+input_str.slice(0, l)).concat(truncate_string_str) : input_str
     end
 
     # @liquid_public_docs
