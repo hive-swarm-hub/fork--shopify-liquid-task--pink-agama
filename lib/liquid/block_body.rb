@@ -248,22 +248,34 @@ module Liquid
       freeze unless frozen?
 
       resource_limits = context.resource_limits
-      resource_limits.increment_render_score(@nodelist.length)
+      nodelist = @nodelist
+      resource_limits.increment_render_score(nodelist.length)
 
       # Check if we need per-node write score tracking
       check_write = resource_limits.render_length_limit || resource_limits.last_capture_length
 
       idx = 0
-      while (node = @nodelist[idx])
-        if node.instance_of?(String)
-          output << node
-        else
-          render_node(context, output, node)
-          break if context.interrupt?
+      if check_write
+        while (node = nodelist[idx])
+          if node.instance_of?(String)
+            output << node
+          else
+            render_node(context, output, node)
+            break if context.interrupt?
+          end
+          idx += 1
+          resource_limits.increment_write_score(output)
         end
-        idx += 1
-
-        resource_limits.increment_write_score(output) if check_write
+      else
+        while (node = nodelist[idx])
+          if node.instance_of?(String)
+            output << node
+          else
+            render_node(context, output, node)
+            break if context.interrupt?
+          end
+          idx += 1
+        end
       end
 
       output
