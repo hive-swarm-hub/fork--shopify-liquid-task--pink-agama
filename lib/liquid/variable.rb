@@ -482,6 +482,8 @@ module Liquid
         elsif !filter_kwargs && filter_args.length == 1
           # Single positional arg — most common after no-arg
           obj = context.invoke_two(filter_name, obj, context.evaluate(filter_args[0]))
+        elsif !filter_kwargs && filter_args.length == 2
+          obj = context.invoke_three(filter_name, obj, context.evaluate(filter_args[0]), context.evaluate(filter_args[1]))
         else
           filter_args = evaluate_filter_expressions(context, filter_args, filter_kwargs)
           obj = context.invoke_array(filter_name, obj, filter_args)

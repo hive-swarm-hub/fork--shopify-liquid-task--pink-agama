@@ -120,6 +120,16 @@ module Liquid
       end
     end
 
+    # Fast path for three-argument filter invocation (input + two args)
+    def invoke_three(method, input, arg1, arg2)
+      result = strainer.invoke_three(method, input, arg1, arg2)
+      if result.instance_of?(String) || result.instance_of?(Integer) || result.instance_of?(Float) || result.nil?
+        result
+      else
+        result.to_liquid
+      end
+    end
+
     # Invoke filter with pre-built args array — avoids splat allocation
     def invoke_array(method, input, args)
       result = strainer.invoke_array(method, input, args)
