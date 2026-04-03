@@ -67,7 +67,7 @@ module Liquid
     # @liquid_syntax string | downcase
     # @liquid_return [string]
     def downcase(input)
-      (input.instance_of?(String) ? input : Utils.to_s(input)).downcase
+      input.instance_of?(String) ? input.downcase : Utils.to_s(input).downcase
     end
 
     # @liquid_public_docs
@@ -78,7 +78,7 @@ module Liquid
     # @liquid_syntax string | upcase
     # @liquid_return [string]
     def upcase(input)
-      (input.instance_of?(String) ? input : Utils.to_s(input)).upcase
+      input.instance_of?(String) ? input.upcase : Utils.to_s(input).upcase
     end
 
     # @liquid_public_docs
@@ -89,7 +89,7 @@ module Liquid
     # @liquid_syntax string | capitalize
     # @liquid_return [string]
     def capitalize(input)
-      Utils.to_s(input).capitalize
+      input.instance_of?(String) ? input.capitalize : Utils.to_s(input).capitalize
     end
 
     # @liquid_public_docs
@@ -403,7 +403,7 @@ module Liquid
     # @liquid_syntax string | strip
     # @liquid_return [string]
     def strip(input)
-      (input.instance_of?(String) ? input : Utils.to_s(input)).strip
+      input.instance_of?(String) ? input.strip : Utils.to_s(input).strip
     end
 
     # @liquid_public_docs
@@ -414,7 +414,7 @@ module Liquid
     # @liquid_syntax string | lstrip
     # @liquid_return [string]
     def lstrip(input)
-      (input.instance_of?(String) ? input : Utils.to_s(input)).lstrip
+      input.instance_of?(String) ? input.lstrip : Utils.to_s(input).lstrip
     end
 
     # @liquid_public_docs
@@ -425,7 +425,7 @@ module Liquid
     # @liquid_syntax string | rstrip
     # @liquid_return [string]
     def rstrip(input)
-      (input.instance_of?(String) ? input : Utils.to_s(input)).rstrip
+      input.instance_of?(String) ? input.rstrip : Utils.to_s(input).rstrip
     end
 
     # @liquid_public_docs
@@ -437,7 +437,7 @@ module Liquid
     # @liquid_return [string]
     STRIP_HTML_BLOCKS_RE = /(?:<script|<!--|<style)/i
     def strip_html(input)
-      input = Utils.to_s(input)
+      input = input.instance_of?(String) ? input : Utils.to_s(input)
       # Fast path: no HTML tags present
       return input unless input.include?('<')
       # Only check for script/comment/style blocks if they might exist
