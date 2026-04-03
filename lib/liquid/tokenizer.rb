@@ -101,7 +101,6 @@ module Liquid
             b = src.getbyte(scan_pos)
             if b == CLOSE_CURLEY # }
               if scan_pos + 1 >= len
-                # } at end of string — emit token up to here
                 @tokens << src.byteslice(idx, scan_pos + 1 - idx)
                 pos = scan_pos + 1
                 found = true
@@ -109,13 +108,11 @@ module Liquid
               end
               b2 = src.getbyte(scan_pos + 1)
               if b2 == CLOSE_CURLEY
-                # Found }} — close variable
                 @tokens << src.byteslice(idx, scan_pos + 2 - idx)
                 pos = scan_pos + 2
                 found = true
                 break
               else
-                # } followed by non-} — emit token up to here (matches original: @ss.pos -= 1)
                 @tokens << src.byteslice(idx, scan_pos + 1 - idx)
                 pos = scan_pos + 1
                 found = true
@@ -123,7 +120,6 @@ module Liquid
               end
             elsif b == OPEN_CURLEY
               if scan_pos + 1 < len && src.getbyte(scan_pos + 1) == PERCENTAGE
-                # Found {% inside {{ — scan to %} and emit as one token
                 close = src.byteindex('%}', scan_pos + 2)
                 if close
                   @tokens << src.byteslice(idx, close + 2 - idx)
