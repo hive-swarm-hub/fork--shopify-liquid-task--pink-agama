@@ -277,11 +277,22 @@ module Liquid
 
     CLOSE_CURLEY_BYTE = 125 # '}'.ord
 
+    # Cache entire Variable objects by their token string
+    GLOBAL_VARIABLE_OBJECT_CACHE = {}
+
     def create_variable(token, parse_context)
       len = token.bytesize
       if len >= 4 && token.getbyte(len - 1) == CLOSE_CURLEY_BYTE && token.getbyte(len - 2) == CLOSE_CURLEY_BYTE
+        # Cache Variable objects — only when default error mode and cacheable
+        em = parse_context.error_mode
+        cacheable = parse_context.variable_cacheable && em != :strict && em != :strict2 && em != :rigid
+        if cacheable && (cached = GLOBAL_VARIABLE_OBJECT_CACHE[token])
+          return cached
+        end
         markup = parse_context.cursor.parse_variable_token(token)
-        return Variable.new(markup, parse_context)
+        var = Variable.new(markup, parse_context)
+        GLOBAL_VARIABLE_OBJECT_CACHE[token] = var if cacheable
+        return var
       end
 
       BlockBody.raise_missing_variable_terminator(token, parse_context)
