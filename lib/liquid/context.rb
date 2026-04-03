@@ -250,7 +250,11 @@ module Liquid
       # Fast path: check top scope first (most common in for loops)
       scope = @scopes[0]
       if scope.key?(key)
-        variable = lookup_and_evaluate(scope, key, raise_on_not_found: raise_on_not_found)
+        # Inline lookup_and_evaluate for top scope (avoids keyword arg method call)
+        variable = scope[key]
+        if variable.instance_of?(Proc) && scope.respond_to?(:[]=)
+          variable = scope[key] = variable.arity == 0 ? variable.call : variable.call(self)
+        end
       elsif @scopes.length == 1
         # Only one scope and key not found — go straight to environments
         variable = try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
