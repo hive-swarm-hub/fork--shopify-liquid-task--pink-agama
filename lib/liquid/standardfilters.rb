@@ -248,7 +248,12 @@ module Liquid
       l = length - truncate_string_str.length
       l = 0 if l < 0
 
-      input_str.length > length ? (+input_str.slice(0, l)).concat(truncate_string_str) : input_str
+      if input_str.length > length
+        result = +input_str.slice(0, l)
+        result << truncate_string_str
+      else
+        input_str
+      end
     end
 
     # @liquid_public_docs
@@ -313,7 +318,7 @@ module Liquid
             # More words exist — truncate
             truncate_string = Utils.to_s(truncate_string)
             if simple_spacing && first_word_start == 0
-              return input.byteslice(0, last_word_end) + truncate_string
+              return (+input.byteslice(0, last_word_end)) << truncate_string
             else
               # Rebuild with normalized whitespace
               result = nil
