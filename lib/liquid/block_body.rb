@@ -127,11 +127,16 @@ module Liquid
     OPEN_CURLEY_BYTE = 123 # '{'.ord
     PERCENT_BYTE = 37 # '%'.ord
 
-    # Fast check if string is whitespace-only (replaces WhitespaceOrNothing regex)
-    BLANK_STRING_REGEX = /\A\s*\z/
-
+    # Fast check if string is whitespace-only (byte-level, avoids regex)
     def self.blank_string?(str)
-      str.match?(BLANK_STRING_REGEX)
+      pos = 0
+      len = str.bytesize
+      while pos < len
+        b = str.getbyte(pos)
+        return false unless b == 32 || b == 9 || b == 10 || b == 13 || b == 12
+        pos += 1
+      end
+      true
     end
 
     private def parse_for_document(tokenizer, parse_context, &block)
