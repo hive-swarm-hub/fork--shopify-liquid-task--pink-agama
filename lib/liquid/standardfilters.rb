@@ -101,7 +101,20 @@ module Liquid
     # @liquid_return [string]
     def escape(input)
       return if input.nil?
-      CGI.escapeHTML(input.instance_of?(String) ? input : Utils.to_s(input))
+      str = input.instance_of?(String) ? input : Utils.to_s(input)
+      # Fast path: scan bytes for HTML-special characters before calling CGI.escapeHTML
+      needs_escape = false
+      i = 0
+      len = str.bytesize
+      while i < len
+        b = str.getbyte(i)
+        if b == 38 || b == 60 || b == 62 || b == 34 || b == 39 # & < > " '
+          needs_escape = true
+          break
+        end
+        i += 1
+      end
+      needs_escape ? CGI.escapeHTML(str) : str
     end
     alias_method :h, :escape
 
@@ -435,6 +448,8 @@ module Liquid
     # @liquid_return [string]
     def strip_html(input)
       input = Utils.to_s(input)
+      # Fast path: no HTML tags present
+      return input unless input.include?('<')
       empty  = ''
       result = input.gsub(STRIP_HTML_BLOCKS, empty)
       result.gsub!(STRIP_HTML_TAGS, empty)
