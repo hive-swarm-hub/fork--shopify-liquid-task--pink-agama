@@ -164,7 +164,9 @@ module Liquid
     end
 
     def evaluate(context)
-      name = @name.instance_of?(String) ? @name : context.evaluate(@name)
+      # Fast path: String names (the overwhelmingly common case) don't need evaluation
+      name = @name
+      name = context.evaluate(name) unless name.instance_of?(String)
       object = context.find_variable(name)
 
       # Fast path: single-segment lookup (e.g. product.title) — avoids Array overhead
