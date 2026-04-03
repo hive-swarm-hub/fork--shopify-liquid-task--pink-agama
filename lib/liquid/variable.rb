@@ -484,7 +484,7 @@ module Liquid
           obj = context.invoke_two(filter_name, obj, context.evaluate(filter_args[0]))
         else
           filter_args = evaluate_filter_expressions(context, filter_args, filter_kwargs)
-          obj = context.invoke(filter_name, obj, *filter_args)
+          obj = context.invoke_array(filter_name, obj, filter_args)
         end
       end
 
