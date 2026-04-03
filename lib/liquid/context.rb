@@ -295,11 +295,11 @@ module Liquid
     end
 
     def lookup_and_evaluate(obj, key, raise_on_not_found: true)
-      if @strict_variables && raise_on_not_found && obj.respond_to?(:key?) && !obj.key?(key)
+      value = obj[key]
+
+      if value.nil? && @strict_variables && raise_on_not_found && obj.respond_to?(:key?) && !obj.key?(key)
         raise Liquid::UndefinedVariable, "undefined variable #{key}"
       end
-
-      value = obj[key]
 
       if value.instance_of?(Proc) && obj.respond_to?(:[]=)
         obj[key] = value.arity == 0 ? value.call : value.call(self)
