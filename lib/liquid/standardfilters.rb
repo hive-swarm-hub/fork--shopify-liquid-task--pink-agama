@@ -463,9 +463,12 @@ module Liquid
     #   Strips all newline characters (line breaks) from a string.
     # @liquid_syntax string | strip_newlines
     # @liquid_return [string]
+    STRIP_NEWLINES_RE = /\r?\n/
     def strip_newlines(input)
       input = Utils.to_s(input)
-      input.gsub(/\r?\n/, '')
+      # Fast path: no newlines present
+      return input unless input.include?("\n")
+      input.gsub(STRIP_NEWLINES_RE, '')
     end
 
     # @liquid_public_docs
