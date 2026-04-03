@@ -57,7 +57,10 @@ module Liquid
         parse_context: parse_context,
       )
 
-      context_variable_name = @alias_name || template_name.split('/').last
+      context_variable_name = @alias_name || begin
+        idx = template_name.rindex('/')
+        idx ? template_name.byteslice(idx + 1, template_name.bytesize - idx - 1) : template_name
+      end
 
       render_partial_func = ->(var, forloop) {
         inner_context               = context.new_isolated_subcontext

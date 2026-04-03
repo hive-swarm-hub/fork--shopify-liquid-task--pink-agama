@@ -176,7 +176,7 @@ module Liquid
             (object.respond_to?(:[]) &&
               ((object.respond_to?(:key?) && object.key?(key)) ||
                (object.respond_to?(:fetch) && key.is_a?(Integer))))
-          object = context.lookup_and_evaluate(object, key)
+          object = context.lookup_and_evaluate_existing(object, key)
           unless object.instance_of?(String) || object.instance_of?(Integer) || object.instance_of?(Float) ||
               object.instance_of?(Array) || object.instance_of?(Hash) || object.nil?
             object = object.to_liquid
@@ -220,7 +220,7 @@ module Liquid
                (object.respond_to?(:fetch) && key.is_a?(Integer))))
 
           # if its a proc we will replace the entry with the proc
-          object = context.lookup_and_evaluate(object, key)
+          object = context.lookup_and_evaluate_existing(object, key)
           # Skip to_liquid for common primitive types (they return self)
           unless object.instance_of?(String) || object.instance_of?(Integer) || object.instance_of?(Float) ||
               object.instance_of?(Array) || object.instance_of?(Hash) || object.nil?

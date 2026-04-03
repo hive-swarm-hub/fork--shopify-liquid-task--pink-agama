@@ -308,6 +308,16 @@ module Liquid
       end
     end
 
+    # Fast lookup: caller already verified key exists, skip strict_variables check
+    def lookup_and_evaluate_existing(obj, key)
+      value = obj[key]
+      if value.instance_of?(Proc) && obj.respond_to?(:[]=)
+        obj[key] = value.arity == 0 ? value.call : value.call(self)
+      else
+        value
+      end
+    end
+
     def with_disabled_tags(tag_names)
       @disabled_tags = {} if @disabled_tags.frozen?
       tag_names.each do |name|

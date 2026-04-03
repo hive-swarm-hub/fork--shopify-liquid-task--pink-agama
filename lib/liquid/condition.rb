@@ -185,18 +185,45 @@ module Liquid
       # return this as the result.
       return context.evaluate(left) if op.nil?
 
-      left  = Liquid::Utils.to_liquid_value(context.evaluate(left))
-      right = Liquid::Utils.to_liquid_value(context.evaluate(right))
+      left = context.evaluate(left)
+      right = context.evaluate(right)
+
+      # Inline to_liquid_value for common primitive types (avoid method call overhead)
+      unless left.instance_of?(String) || left.instance_of?(Integer) || left.instance_of?(Float) ||
+          left.nil? || left.equal?(true) || left.equal?(false) || left.instance_of?(Array) || left.instance_of?(Hash)
+        left = left.respond_to?(:to_liquid_value) ? left.to_liquid_value : left
+      end
+      unless right.instance_of?(String) || right.instance_of?(Integer) || right.instance_of?(Float) ||
+          right.nil? || right.equal?(true) || right.equal?(false) || right.instance_of?(Array) || right.instance_of?(Hash)
+        right = right.respond_to?(:to_liquid_value) ? right.to_liquid_value : right
+      end
 
       case op
       when '=='
-        equal_variables(left, right)
-      when '!='
-        !equal_variables(left, right)
-      when '<', '>', '>=', '<='
-        if left.respond_to?(op) && right.respond_to?(op) && !left.is_a?(Hash) && !right.is_a?(Hash)
-          left.send(op, right)
+        # Inline equal_variables for common case (no MethodLiteral)
+        if left.instance_of?(Condition::MethodLiteral)
+          call_method_literal(left, right)
+        elsif right.instance_of?(Condition::MethodLiteral)
+          call_method_literal(right, left)
+        else
+          left == right
         end
+      when '!='
+        if left.instance_of?(Condition::MethodLiteral)
+          !call_method_literal(left, right)
+        elsif right.instance_of?(Condition::MethodLiteral)
+          !call_method_literal(right, left)
+        else
+          left != right
+        end
+      when '<'
+        left < right if left.respond_to?(:<) && right.respond_to?(:<) && !left.is_a?(Hash) && !right.is_a?(Hash)
+      when '>'
+        left > right if left.respond_to?(:>) && right.respond_to?(:>) && !left.is_a?(Hash) && !right.is_a?(Hash)
+      when '>='
+        left >= right if left.respond_to?(:>=) && right.respond_to?(:>=) && !left.is_a?(Hash) && !right.is_a?(Hash)
+      when '<='
+        left <= right if left.respond_to?(:<=) && right.respond_to?(:<=) && !left.is_a?(Hash) && !right.is_a?(Hash)
       else
         operation = self.class.operators[op] || raise(Liquid::ArgumentError, "Unknown operator #{op}")
         if operation.respond_to?(:call)

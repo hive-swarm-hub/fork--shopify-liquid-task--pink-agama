@@ -200,8 +200,35 @@ module Liquid
 
     def render!(*args)
       @rethrow_errors = true
+      # Fast path: single Hash argument (the overwhelmingly common case)
+      if args.length == 1 && args[0].instance_of?(Hash)
+        return render_hash_internal(args[0])
+      end
       render(*args)
     end
+
+    private def render_hash_internal(hash_arg)
+      return '' if @root.nil?
+
+      context = Context.new([hash_arg, assigns], instance_assigns, registers, @rethrow_errors, @resource_limits, Const::EMPTY_HASH, @environment)
+
+      context.resource_limits.reset
+
+      if @profiling && context.profiler.nil?
+        @profiler = context.profiler = Liquid::Profiler.new
+      end
+
+      context.template_name ||= name
+
+      begin
+        @root.render_to_output_buffer(context, +'')
+      rescue Liquid::MemoryError => e
+        context.handle_error(e)
+      ensure
+        @errors = context.errors
+      end
+    end
+    public
 
     def render_to_output_buffer(context, output)
       render(context, output: output)
