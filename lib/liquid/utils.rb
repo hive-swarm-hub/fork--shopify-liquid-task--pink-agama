@@ -17,9 +17,9 @@ module Liquid
           collection.slice(from..) || Const::EMPTY_ARRAY
         end
       elsif collection.is_a?(String)
-        collection.empty? ? Const::EMPTY_ARRAY : [collection]
+        collection.empty? ? [] : [collection]
       elsif collection.nil? || !collection.respond_to?(:each)
-        Const::EMPTY_ARRAY
+        []
       else
         slice_collection_using_each(collection, from, to)
       end
