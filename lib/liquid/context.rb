@@ -251,37 +251,27 @@ module Liquid
       scope = @scopes[0]
       if scope.key?(key)
         variable = lookup_and_evaluate(scope, key, raise_on_not_found: raise_on_not_found)
+      elsif @scopes.length == 1
+        # Only one scope and key not found — go straight to environments
+        variable = try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
       else
+        # Multiple scopes — search through all of them
         scopes = @scopes
+        found_scope = nil
+        i = 1
         len = scopes.length
-        if len == 1
-          # Only one scope and key not found — go straight to environments
-          variable = try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
-        elsif len == 2
-          # Fast path: 2 scopes (very common: for-loop + base)
-          scope1 = scopes[1]
-          variable = if scope1.key?(key)
-            lookup_and_evaluate(scope1, key, raise_on_not_found: raise_on_not_found)
-          else
-            try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
+        while i < len
+          if scopes[i].key?(key)
+            found_scope = scopes[i]
+            break
           end
-        else
-          # Multiple scopes — search through all of them
-          found_scope = nil
-          i = 1
-          while i < len
-            if scopes[i].key?(key)
-              found_scope = scopes[i]
-              break
-            end
-            i += 1
-          end
+          i += 1
+        end
 
-          variable = if found_scope
-            lookup_and_evaluate(found_scope, key, raise_on_not_found: raise_on_not_found)
-          else
-            try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
-          end
+        variable = if found_scope
+          lookup_and_evaluate(found_scope, key, raise_on_not_found: raise_on_not_found)
+        else
+          try_variable_find_in_environments(key, raise_on_not_found: raise_on_not_found)
         end
       end
 
